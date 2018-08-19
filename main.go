@@ -1,72 +1,65 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
+type response struct {
+	ID     int                 `json:"id"`
+	Status string              `json:"status"`
+	Header map[string][]string `json:"headers"`
+	Body   int                 `json:"body"`
+}
+
+var ch = make(chan task)
+var responses []response
+
 func main() {
+	go func() {
+		tokens := make(chan struct{}, 5)
+		for v := range ch {
+			tokens <- struct{}{}
+			go fetchLink(v)
+			<-tokens
+		}
+		defer close(tokens)
+	}()
 
-	log.Println("Starting server")
-
-	http.HandleFunc("/add", addTask)
-	http.HandleFunc("/get", getTask)
-
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err)
-	}
+	r := gin.Default()
+	routes(r)
+	r.Run()
 }
 
-func fetchTask(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer r.Body.Close()
-
-	var req request
-	var resp response
-
-	if err := json.Unmarshal(b, &req); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := fetchLink(req, &resp); err != nil {
-		log.Fatal(err)
-	}
-
-	result, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Write(result)
-}
-
-func fetchLink(r request, w *response) error {
-
+func fetchLink(t task) {
 	client := &http.Client{}
-	req, err := http.NewRequest(r.Method, r.URL, nil)
+	req, err := http.NewRequest(t.Method, t.URL, nil)
 	if err != nil {
-		return err
+		log.Println(err)
+		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		log.Println(err)
+		return
 	}
 	defer resp.Body.Close()
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		log.Println(err)
+		return
 	}
 
-	w.Status = resp.Status
-	w.Body = len(b)
-	w.Header = resp.Header
-
-	return nil
+	mu.Lock()
+	responses = append(responses, response{
+		Status: resp.Status,
+		Body:   len(b),
+		Header: resp.Header,
+	})
+	mu.Unlock()
 }
