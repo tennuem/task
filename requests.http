@@ -8,12 +8,6 @@ Content-Type: application/json
 
 ###
 GET http://localhost:8080/get
-Content-Type: application/json
-
-{
-    "count": 2,
-    "page": 2
-}
 
 ###
 DELETE http://localhost:8080/delete
