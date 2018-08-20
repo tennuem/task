@@ -9,7 +9,6 @@ import (
 )
 
 type response struct {
-	ID     int                 `json:"id"`
 	Status string              `json:"status"`
 	Header map[string][]string `json:"headers"`
 	Body   int                 `json:"body"`

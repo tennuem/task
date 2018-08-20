@@ -1,19 +1,18 @@
 package main
 
 import (
-	"log"
 	"sync"
 
 	"github.com/gin-gonic/gin"
 )
 
 type task struct {
-	Method string `json:"method"`
-	URL    string `json:"url"`
+	Method string `json:"method" binding:"required"`
+	URL    string `json:"url" binding:"required"`
 }
 
 type taskDelete struct {
-	ID int `json:"id"`
+	ID int `json:"id" binding:"required"`
 }
 
 var tasks = make(map[int]task)
@@ -47,13 +46,12 @@ func deleteTask(c *gin.Context) {
 		return
 	}
 
-	log.Println(tasks[t.ID])
+	mu.Lock()
 	if _, ok := tasks[t.ID]; !ok {
 		c.Status(404)
 		return
 	}
 
-	mu.Lock()
 	delete(tasks, t.ID)
 	mu.Unlock()
 	c.Status(200)
