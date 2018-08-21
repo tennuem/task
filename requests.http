@@ -14,7 +14,7 @@ DELETE http://localhost:8080/delete
 Content-Type: application/json
 
 {
-    "id": 1
+    "id": "46c7f688-1f8e-4be6-b294-51162283734d"
 }
 
 ###
