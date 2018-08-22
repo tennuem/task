@@ -22,7 +22,7 @@ func main() {
 		tokens := make(chan struct{}, 5)
 		for v := range ch {
 			tokens <- struct{}{}
-			go fetchLink(v)
+			fetchLink(v)
 			<-tokens
 		}
 		defer close(tokens)

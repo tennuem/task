@@ -3,6 +3,8 @@ package main
 import (
 	"sync"
 
+	"github.com/satori/go.uuid"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,10 +14,10 @@ type task struct {
 }
 
 type taskDelete struct {
-	ID int `json:"id" binding:"required"`
+	ID string `json:"id" binding:"required"`
 }
 
-var tasks = make(map[int]task)
+var tasks = make(map[uuid.UUID]task)
 var mu sync.Mutex
 
 func addTask(c *gin.Context) {
@@ -27,10 +29,16 @@ func addTask(c *gin.Context) {
 
 	ch <- t
 
+	id, err := uuid.NewV4()
+	if err != nil {
+		c.Status(500)
+		return
+	}
+
 	mu.Lock()
-	tasks[len(tasks)] = t
+	tasks[id] = t
 	mu.Unlock()
-	c.Status(200)
+	c.Status(201)
 }
 
 func getTask(c *gin.Context) {
@@ -46,13 +54,18 @@ func deleteTask(c *gin.Context) {
 		return
 	}
 
+	id, err := uuid.FromString(t.ID)
+	if err != nil {
+		c.Status(500)
+	}
+
 	mu.Lock()
-	if _, ok := tasks[t.ID]; !ok {
+	if _, ok := tasks[id]; !ok {
 		c.Status(404)
 		return
 	}
 
-	delete(tasks, t.ID)
+	delete(tasks, id)
 	mu.Unlock()
 	c.Status(200)
 }
