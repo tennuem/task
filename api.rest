@@ -1,0 +1,34 @@
+@host = http://localhost:8080
+
+###
+POST {{host}}/task
+Content-Type: application/json
+
+{
+    "task": {
+        "id": 1,
+        "title": "task title",
+        "description": "description task"
+    }
+}
+
+###
+GET {{host}}/task
+
+###
+GET {{host}}/task/1
+
+###
+PUT {{host}}/task/1
+Content-Type: application/json
+
+{
+    "task": {
+        "id": 1,
+        "title": "task title updated",
+        "description": "description task updated"
+    }
+}
+
+###
+DELETE {{host}}/task/1

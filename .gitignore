@@ -1,1 +1,4 @@
-fetchtask
+.vscode
+vendor
+.DS_Store
+bin
