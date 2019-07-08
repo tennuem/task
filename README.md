@@ -1,1 +1,1 @@
-# task [![Build Status](https://travis-ci.org/tennuem/task.svg?branch=master)](https://travis-ci.org/tennuem/task)
+# task [![Build Status](https://travis-ci.org/tennuem/task.svg?branch=master)](https://travis-ci.org/tennuem/task) [![Coverage Status](https://coveralls.io/repos/github/tennuem/task/badge.svg?branch=master)](https://coveralls.io/github/tennuem/task?branch=master)
