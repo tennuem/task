@@ -1,6 +1,8 @@
 package task
 
-import "context"
+import (
+	"context"
+)
 
 type Task struct {
 	ID          int
