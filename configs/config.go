@@ -17,8 +17,6 @@ const ServiceName = "task"
 var options = []option{
 	{"config", "string", "", "config file"},
 
-	{"server.grpc.host", "string", "0.0.0.0", "server grpc host"},
-	{"server.grpc.port", "int", 9090, "server grpc port"},
 	{"server.http.host", "string", "0.0.0.0", "server grpc host"},
 	{"server.http.port", "int", 8080, "server http port"},
 
