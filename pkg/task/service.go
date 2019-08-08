@@ -5,9 +5,9 @@ import (
 )
 
 type Task struct {
-	ID          int
-	Title       string
-	Description string
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }
 
 type Service interface {
