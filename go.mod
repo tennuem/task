@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/go-kit/kit v0.9.0
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
 	github.com/oklog/run v1.0.0
 	github.com/spf13/pflag v1.0.3

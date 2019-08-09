@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/tennuem/task/pkg/task"
 )
 
@@ -15,18 +16,19 @@ var (
 
 func NewRepository() task.Repository {
 	return &inmemRepo{
-		store: make(map[int]*task.Task, 0),
+		store: make(map[uuid.UUID]*task.Task, 0),
 	}
 }
 
 type inmemRepo struct {
 	mtx   sync.Mutex
-	store map[int]*task.Task
+	store map[uuid.UUID]*task.Task
 }
 
 func (r *inmemRepo) Create(ctx context.Context, t *task.Task) error {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
+	t.ID = uuid.New()
 	r.store[t.ID] = t
 	return nil
 }
@@ -41,7 +43,7 @@ func (r *inmemRepo) GetList(ctx context.Context) []*task.Task {
 	return result
 }
 
-func (r *inmemRepo) GetByID(ctx context.Context, ID int) (*task.Task, error) {
+func (r *inmemRepo) GetByID(ctx context.Context, ID uuid.UUID) (*task.Task, error) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	v, ok := r.store[ID]
@@ -61,7 +63,7 @@ func (r *inmemRepo) Update(ctx context.Context, t *task.Task) error {
 	return nil
 }
 
-func (r *inmemRepo) Delete(ctx context.Context, ID int) error {
+func (r *inmemRepo) Delete(ctx context.Context, ID uuid.UUID) error {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	delete(r.store, ID)

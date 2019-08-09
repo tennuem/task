@@ -2,28 +2,30 @@ package task
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Task struct {
-	ID          int    `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	ID          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
 }
 
 type Service interface {
 	Create(context.Context, *Task) error
 	GetList(context.Context) []*Task
-	GetByID(ctx context.Context, ID int) (*Task, error)
+	GetByID(ctx context.Context, ID uuid.UUID) (*Task, error)
 	Update(ctx context.Context, t *Task) error
-	Delete(ctx context.Context, ID int) error
+	Delete(ctx context.Context, ID uuid.UUID) error
 }
 
 type Repository interface {
 	Create(context.Context, *Task) error
 	GetList(context.Context) []*Task
-	GetByID(ctx context.Context, ID int) (*Task, error)
+	GetByID(ctx context.Context, ID uuid.UUID) (*Task, error)
 	Update(ctx context.Context, t *Task) error
-	Delete(ctx context.Context, ID int) error
+	Delete(ctx context.Context, ID uuid.UUID) error
 }
 
 func NewService(repo Repository) Service {
@@ -42,7 +44,7 @@ func (s *service) GetList(ctx context.Context) []*Task {
 	return s.repo.GetList(ctx)
 }
 
-func (s *service) GetByID(ctx context.Context, ID int) (*Task, error) {
+func (s *service) GetByID(ctx context.Context, ID uuid.UUID) (*Task, error) {
 	return s.repo.GetByID(ctx, ID)
 }
 
@@ -50,6 +52,6 @@ func (s *service) Update(ctx context.Context, t *Task) error {
 	return s.repo.Update(ctx, t)
 }
 
-func (s *service) Delete(ctx context.Context, ID int) error {
+func (s *service) Delete(ctx context.Context, ID uuid.UUID) error {
 	return s.repo.Delete(ctx, ID)
 }

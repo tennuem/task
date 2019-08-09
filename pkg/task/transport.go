@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -74,18 +74,28 @@ func decodeHTTPGetByIDRequest(_ context.Context, r *http.Request) (interface{}, 
 	if !ok {
 		return nil, errBadRoute
 	}
-	id, err := strconv.ParseUint(s, 10, 32)
+	id, err := uuid.Parse(s)
 	if err != nil {
 		return nil, errBadRoute
 	}
-	return GetByIDRequest{ID: int(id)}, nil
+	return GetByIDRequest{ID: id}, nil
 }
 
 func decodeHTTPUpdateRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	s, ok := vars["id"]
+	if !ok {
+		return nil, errBadRoute
+	}
+	id, err := uuid.Parse(s)
+	if err != nil {
+		return nil, errBadRoute
+	}
 	var request UpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+	request.Task.ID = id
 	return request, nil
 }
 
@@ -95,11 +105,11 @@ func decodeHTTPDeleteRequest(_ context.Context, r *http.Request) (interface{}, e
 	if !ok {
 		return nil, errBadRoute
 	}
-	id, err := strconv.ParseUint(s, 10, 32)
+	id, err := uuid.Parse(s)
 	if err != nil {
 		return nil, errBadRoute
 	}
-	return DeleteRequest{ID: int(id)}, nil
+	return DeleteRequest{ID: id}, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {

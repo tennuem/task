@@ -6,7 +6,6 @@ Content-Type: application/json
 
 {
     "task": {
-        "id": 1,
         "title": "task title",
         "description": "description task"
     }
@@ -16,19 +15,18 @@ Content-Type: application/json
 GET {{host}}/task
 
 ###
-GET {{host}}/task/1
+GET {{host}}/task/a5907310-357c-494c-94e8-f22b220fd528
 
 ###
-PUT {{host}}/task/1
+PUT {{host}}/task/a5907310-357c-494c-94e8-f22b220fd528
 Content-Type: application/json
 
 {
     "task": {
-        "id": 1,
         "title": "task title updated",
         "description": "description task updated"
     }
 }
 
 ###
-DELETE {{host}}/task/1
+DELETE {{host}}/task/a5907310-357c-494c-94e8-f22b220fd528

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
+	"github.com/google/uuid"
 )
 
 func makeCreateEndpoint(s Service) endpoint.Endpoint {
@@ -65,7 +66,7 @@ type GetListResponse struct {
 func (r GetListResponse) error() error { return r.Err }
 
 type GetByIDRequest struct {
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 }
 
 type GetByIDResponse struct {
@@ -86,7 +87,7 @@ type UpdateResponse struct {
 func (r UpdateResponse) error() error { return r.Err }
 
 type DeleteRequest struct {
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 }
 
 type DeleteResponse struct {

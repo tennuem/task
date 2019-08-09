@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/google/uuid"
 )
 
 // NewLoggingService returns a new instance of a logging Service.
@@ -42,7 +43,7 @@ func (s *loggingService) GetList(ctx context.Context) []*Task {
 	return s.Service.GetList(ctx)
 }
 
-func (s *loggingService) GetByID(ctx context.Context, ID int) (t *Task, err error) {
+func (s *loggingService) GetByID(ctx context.Context, ID uuid.UUID) (t *Task, err error) {
 	defer func(begin time.Time) {
 		level.Info(s.logger).Log(
 			"code", getHTTPStatusCode(err),
@@ -66,7 +67,7 @@ func (s *loggingService) Update(ctx context.Context, t *Task) (err error) {
 	return s.Service.Update(ctx, t)
 }
 
-func (s *loggingService) Delete(ctx context.Context, ID int) (err error) {
+func (s *loggingService) Delete(ctx context.Context, ID uuid.UUID) (err error) {
 	defer func(begin time.Time) {
 		level.Info(s.logger).Log(
 			"code", getHTTPStatusCode(err),
