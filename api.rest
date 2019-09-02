@@ -1,4 +1,4 @@
-@host = http://localhost:8080
+@host = http://0.0.0.0:8080
 
 ###
 POST {{host}}/task

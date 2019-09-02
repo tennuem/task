@@ -10,8 +10,8 @@ import (
 func makeCreateEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
-		err := s.Create(ctx, req.Task)
-		return CreateResponse{Err: err}, nil
+		resp, err := s.Create(ctx, req.Task)
+		return CreateResponse{resp, err}, nil
 	}
 }
 
@@ -33,8 +33,8 @@ func makeGetByIDEndpoint(s Service) endpoint.Endpoint {
 func makeUpdateEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(UpdateRequest)
-		err := s.Update(ctx, req.Task)
-		return UpdateResponse{err}, nil
+		resp, err := s.Update(ctx, req.Task)
+		return UpdateResponse{resp, err}, nil
 	}
 }
 
@@ -51,7 +51,8 @@ type CreateRequest struct {
 }
 
 type CreateResponse struct {
-	Err error `json:"error,omitempty"`
+	Task *Task `json:"task,omitempty"`
+	Err  error `json:"error,omitempty"`
 }
 
 func (r CreateResponse) error() error { return r.Err }
@@ -81,7 +82,8 @@ type UpdateRequest struct {
 }
 
 type UpdateResponse struct {
-	Err error `json:"error,omitempty"`
+	Task *Task `json:"task,omitempty"`
+	Err  error `json:"error,omitempty"`
 }
 
 func (r UpdateResponse) error() error { return r.Err }

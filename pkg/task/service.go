@@ -13,18 +13,18 @@ type Task struct {
 }
 
 type Service interface {
-	Create(context.Context, *Task) error
+	Create(context.Context, *Task) (*Task, error)
 	GetList(context.Context) []*Task
 	GetByID(ctx context.Context, ID uuid.UUID) (*Task, error)
-	Update(ctx context.Context, t *Task) error
+	Update(ctx context.Context, t *Task) (*Task, error)
 	Delete(ctx context.Context, ID uuid.UUID) error
 }
 
 type Repository interface {
-	Create(context.Context, *Task) error
+	Create(context.Context, *Task) (*Task, error)
 	GetList(context.Context) []*Task
 	GetByID(ctx context.Context, ID uuid.UUID) (*Task, error)
-	Update(ctx context.Context, t *Task) error
+	Update(ctx context.Context, t *Task) (*Task, error)
 	Delete(ctx context.Context, ID uuid.UUID) error
 }
 
@@ -36,7 +36,7 @@ type service struct {
 	repo Repository
 }
 
-func (s *service) Create(ctx context.Context, t *Task) error {
+func (s *service) Create(ctx context.Context, t *Task) (*Task, error) {
 	return s.repo.Create(ctx, t)
 }
 
@@ -48,7 +48,7 @@ func (s *service) GetByID(ctx context.Context, ID uuid.UUID) (*Task, error) {
 	return s.repo.GetByID(ctx, ID)
 }
 
-func (s *service) Update(ctx context.Context, t *Task) error {
+func (s *service) Update(ctx context.Context, t *Task) (*Task, error) {
 	return s.repo.Update(ctx, t)
 }
 

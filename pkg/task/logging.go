@@ -19,7 +19,7 @@ type loggingService struct {
 	Service
 }
 
-func (s *loggingService) Create(ctx context.Context, t *Task) (err error) {
+func (s *loggingService) Create(ctx context.Context, t *Task) (res *Task, err error) {
 	defer func(begin time.Time) {
 		level.Info(s.logger).Log(
 			"code", getHTTPStatusCode(err),
@@ -55,7 +55,7 @@ func (s *loggingService) GetByID(ctx context.Context, ID uuid.UUID) (t *Task, er
 	return s.Service.GetByID(ctx, ID)
 }
 
-func (s *loggingService) Update(ctx context.Context, t *Task) (err error) {
+func (s *loggingService) Update(ctx context.Context, t *Task) (res *Task, err error) {
 	defer func(begin time.Time) {
 		level.Info(s.logger).Log(
 			"code", getHTTPStatusCode(err),

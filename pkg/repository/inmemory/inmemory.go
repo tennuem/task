@@ -25,12 +25,12 @@ type inmemRepo struct {
 	store map[uuid.UUID]*task.Task
 }
 
-func (r *inmemRepo) Create(ctx context.Context, t *task.Task) error {
+func (r *inmemRepo) Create(ctx context.Context, t *task.Task) (*task.Task, error) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	t.ID = uuid.New()
 	r.store[t.ID] = t
-	return nil
+	return r.store[t.ID], nil
 }
 
 func (r *inmemRepo) GetList(ctx context.Context) []*task.Task {
@@ -53,19 +53,22 @@ func (r *inmemRepo) GetByID(ctx context.Context, ID uuid.UUID) (*task.Task, erro
 	return v, nil
 }
 
-func (r *inmemRepo) Update(ctx context.Context, t *task.Task) error {
+func (r *inmemRepo) Update(ctx context.Context, t *task.Task) (*task.Task, error) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	if _, ok := r.store[t.ID]; !ok {
-		return ErrTaskNotExist
+		return nil, ErrTaskNotExist
 	}
 	r.store[t.ID] = t
-	return nil
+	return r.store[t.ID], nil
 }
 
 func (r *inmemRepo) Delete(ctx context.Context, ID uuid.UUID) error {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
+	if _, ok := r.store[ID]; !ok {
+		return ErrTaskNotExist
+	}
 	delete(r.store, ID)
 	return nil
 }

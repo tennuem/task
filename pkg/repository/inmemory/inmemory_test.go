@@ -8,32 +8,104 @@ import (
 	"github.com/tennuem/task/pkg/task"
 )
 
-func TestInmemory(t *testing.T) {
-	var (
-		testData1 = task.Task{
-			ID:          1,
+func TestCreateGetTask(t *testing.T) {
+	testData := []*task.Task{
+		{
 			Title:       "Task title",
 			Description: "Task description",
-		}
-		testData2 = task.Task{
-			ID:          1,
+		},
+		{
 			Title:       "Task title updated",
 			Description: "Task description updated",
-		}
-		repo = NewRepository()
-	)
+		},
+	}
+	repo := NewRepository()
 
-	err := repo.Create(context.Background(), &testData1)
-	tasks := repo.GetList(context.Background())
-	taskResp, err := repo.GetByID(context.Background(), testData1.ID)
-	err = repo.Update(context.Background(), &testData2)
-	err = repo.Delete(context.Background(), testData2.ID)
+	for _, v := range testData {
+		createResp, err := repo.Create(context.Background(), v)
+		getResp, err := repo.GetByID(context.Background(), createResp.ID)
 
-	assert.NoError(t, err)
-	assert.Equal(t, tasks[0].ID, testData1.ID)
-	assert.Equal(t, tasks[0].Title, testData1.Title)
-	assert.Equal(t, tasks[0].Description, testData1.Description)
-	assert.Equal(t, taskResp.ID, testData1.ID)
-	assert.Equal(t, taskResp.Title, testData1.Title)
-	assert.Equal(t, taskResp.Description, testData1.Description)
+		assert.NoError(t, err)
+		assert.NotNil(t, getResp.ID)
+		assert.Equal(t, v.Title, getResp.Title)
+		assert.Equal(t, v.Description, getResp.Description)
+	}
+}
+
+func TestGetTasksList(t *testing.T) {
+	testData := []*task.Task{
+		{
+			Title:       "Task title",
+			Description: "Task description",
+		},
+		{
+			Title:       "Task title updated",
+			Description: "Task description updated",
+		},
+	}
+	repo := NewRepository()
+
+	for i := 0; i < len(testData); i++ {
+		v := testData[i]
+
+		_, err := repo.Create(context.Background(), v)
+		resp := repo.GetList(context.Background())
+
+		assert.NoError(t, err)
+		assert.Equal(t, v.Title, resp[i].Title)
+		assert.Equal(t, v.Description, resp[i].Description)
+	}
+}
+
+func TestUpdateTask(t *testing.T) {
+	testData := []*task.Task{
+		{
+			Title:       "Task title",
+			Description: "Task description",
+		},
+		{
+			Title:       "Task title updated",
+			Description: "Task description updated",
+		},
+	}
+	repo := NewRepository()
+
+	for _, v := range testData {
+		_, err := repo.Create(context.Background(), v)
+
+		updatedTitle := "Updated title"
+		updatedDescription := "Updated description"
+		v.Title = updatedTitle
+		v.Description = updatedDescription
+		resp, err := repo.Update(context.Background(), v)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, resp.ID)
+		assert.Equal(t, updatedTitle, resp.Title)
+		assert.Equal(t, updatedDescription, resp.Description)
+	}
+}
+
+func TestDeleteTask(t *testing.T) {
+	testData := []*task.Task{
+		{
+			Title:       "Task title",
+			Description: "Task description",
+		},
+		{
+			Title:       "Task title updated",
+			Description: "Task description updated",
+		},
+	}
+	repo := NewRepository()
+
+	for _, v := range testData {
+		createResp, err := repo.Create(context.Background(), v)
+
+		err = repo.Delete(context.Background(), createResp.ID)
+
+		_, err = repo.GetByID(context.Background(), createResp.ID)
+
+		assert.EqualError(t, err, ErrTaskNotExist.Error())
+	}
 }
