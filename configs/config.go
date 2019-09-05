@@ -25,22 +25,16 @@ var options = []option{
 }
 
 type Config struct {
-	Server Server
-	Logger Logger
-}
-
-type Server struct {
-	HTTP HTTP
-}
-
-type HTTP struct {
-	Host string
-	Port int
-}
-
-type Logger struct {
-	Level      string
-	TimeFormat string
+	Server struct {
+		HTTP struct {
+			Host string
+			Port int
+		}
+	}
+	Logger struct {
+		Level      string
+		TimeFormat string
+	}
 }
 
 type option struct {
