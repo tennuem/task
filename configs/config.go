@@ -17,11 +17,14 @@ const ServiceName = "task"
 var options = []option{
 	{"config", "string", "", "config file"},
 
-	{"server.http.host", "string", "0.0.0.0", "server grpc host"},
+	{"server.http.host", "string", "0.0.0.0", "server http host"},
 	{"server.http.port", "int", 8080, "server http port"},
 
 	{"logger.level", "string", "emerg", "Level of logging. A string that correspond to the following levels: emerg, alert, crit, err, warning, notice, info, debug"},
 	{"logger.time_format", "string", "2006-01-02T15:04:05.999999999", "Date format in logs"},
+
+	{"metric.host", "string", "0.0.0.0", "metric host"},
+	{"metric.port", "int", 9153, "server port"},
 }
 
 type Config struct {
@@ -34,6 +37,10 @@ type Config struct {
 	Logger struct {
 		Level      string
 		TimeFormat string
+	}
+	Metric struct {
+		Host string
+		Port int
 	}
 }
 
