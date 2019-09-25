@@ -48,20 +48,20 @@ func main() {
 		taskService,
 	)
 
-	mux := mux.NewRouter().StrictSlash(false)
-	mux.PathPrefix("/task").Handler(task.MakeHTTPHandler(taskService, log.With(logger, "component", "http handler")))
+	r := mux.NewRouter().StrictSlash(false)
+	r.PathPrefix("/task").Handler(task.MakeHTTPHandler(taskService, log.With(logger, "component", "http handler")))
 
 	var g run.Group
 	{
 		addr := fmt.Sprintf("%s:%d", cfg.Server.HTTP.Host, cfg.Server.HTTP.Port)
 		listener, err := net.Listen("tcp", addr)
 		if err != nil {
-			level.Error(logger).Log("transport", "HTTP", "addr", addr, "err", err)
+			level.Error(logger).Log("component", "HTTP server", "addr", addr, "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			level.Info(logger).Log("transport", "HTTP", "addr", addr, "msg", "listening...")
-			return http.Serve(listener, accessControl(mux))
+			level.Info(logger).Log("component", "HTTP server", "addr", addr, "msg", "listening...")
+			return http.Serve(listener, accessControl(r))
 		}, func(error) {
 			listener.Close()
 		})
@@ -77,6 +77,24 @@ func main() {
 			level.Info(logger).Log("component", "metric server", "addr", addr, "msg", "listening...")
 			http.Handle("/metrics", promhttp.Handler())
 			return http.Serve(listener, http.DefaultServeMux)
+		}, func(error) {
+			listener.Close()
+		})
+	}
+	{
+		addr := fmt.Sprintf("%s:%d", cfg.Server.HTTP.Host, 8089)
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			level.Error(logger).Log("component", "prefix server", "addr", addr, "err", err)
+			os.Exit(1)
+		}
+		g.Add(func() error {
+			level.Info(logger).Log("component", "prefix server", "addr", addr, "msg", "listening...")
+			r := mux.NewRouter()
+			r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte(fmt.Sprintf("%s%s", r.Host, r.RequestURI)))
+			})
+			return http.Serve(listener, accessControl(r))
 		}, func(error) {
 			listener.Close()
 		})
