@@ -10,8 +10,11 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/gorilla/mux"
 	"github.com/oklog/run"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tennuem/task/configs"
 	"github.com/tennuem/task/pkg/repository/inmemory"
 	"github.com/tennuem/task/pkg/task"
@@ -28,21 +31,70 @@ func main() {
 	var taskService task.Service
 	taskService = task.NewService(tasks)
 	taskService = task.NewLoggingService(log.With(logger, "component", "task"), taskService)
+	fieldKeys := []string{"handler", "code"}
+	taskService = task.NewMetricService(
+		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+			Namespace: "esp",
+			Subsystem: "task_service",
+			Name:      "requests_total",
+			Help:      "Number of requests received.",
+		}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "esp",
+			Subsystem: "task_service",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys),
+		taskService,
+	)
 
-	mux := mux.NewRouter().StrictSlash(false)
-	mux.PathPrefix("/task").Handler(task.MakeHTTPHandler(taskService, log.With(logger, "component", "http handler")))
+	r := mux.NewRouter().StrictSlash(false)
+	r.PathPrefix("/task").Handler(task.MakeHTTPHandler(taskService, log.With(logger, "component", "http handler")))
 
 	var g run.Group
 	{
 		addr := fmt.Sprintf("%s:%d", cfg.Server.HTTP.Host, cfg.Server.HTTP.Port)
 		listener, err := net.Listen("tcp", addr)
 		if err != nil {
-			level.Error(logger).Log("transport", "HTTP", "addr", addr, "err", err)
+			level.Error(logger).Log("component", "HTTP server", "addr", addr, "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			level.Info(logger).Log("transport", "HTTP", "addr", addr, "msg", "listening")
-			return http.Serve(listener, accessControl(mux))
+			level.Info(logger).Log("component", "HTTP server", "addr", addr, "msg", "listening...")
+			return http.Serve(listener, accessControl(r))
+		}, func(error) {
+			listener.Close()
+		})
+	}
+	{
+		addr := fmt.Sprintf("%s:%d", cfg.Metric.Host, cfg.Metric.Port)
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			level.Error(logger).Log("component", "metric server", "addr", addr, "err", err)
+			os.Exit(1)
+		}
+		g.Add(func() error {
+			level.Info(logger).Log("component", "metric server", "addr", addr, "msg", "listening...")
+			http.Handle("/metrics", promhttp.Handler())
+			return http.Serve(listener, http.DefaultServeMux)
+		}, func(error) {
+			listener.Close()
+		})
+	}
+	{
+		addr := fmt.Sprintf("%s:%d", cfg.Server.HTTP.Host, 8089)
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			level.Error(logger).Log("component", "prefix server", "addr", addr, "err", err)
+			os.Exit(1)
+		}
+		g.Add(func() error {
+			level.Info(logger).Log("component", "prefix server", "addr", addr, "msg", "listening...")
+			r := mux.NewRouter()
+			r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte(fmt.Sprintf("%s%s", r.Host, r.RequestURI)))
+			})
+			return http.Serve(listener, accessControl(r))
 		}, func(error) {
 			listener.Close()
 		})
