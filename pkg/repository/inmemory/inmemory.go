@@ -16,7 +16,7 @@ var (
 
 func NewRepository() task.Repository {
 	return &inmemRepo{
-		store: make(map[uuid.UUID]*task.Task, 0),
+		store: make(map[uuid.UUID]*task.Task),
 	}
 }
 
