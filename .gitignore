@@ -1,4 +1,6 @@
 .vscode
-vendor
+.idea/
+/vendor/
 .DS_Store
-bin
+/bin/
+/rest-client.env.json
