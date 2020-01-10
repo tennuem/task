@@ -1,4 +1,11 @@
-@host = http://0.0.0.0:8080
+###
+GET http://{{host}}/liveness
+
+###
+GET http://{{host}}/readiness
+
+###
+GET http://{{host}}/version
 
 ###
 POST {{host}}/task
@@ -30,3 +37,5 @@ Content-Type: application/json
 
 ###
 DELETE {{host}}/task/a5907310-357c-494c-94e8-f22b220fd528
+
+###

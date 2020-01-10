@@ -9,6 +9,7 @@ import (
 	"github.com/oklog/run"
 	"github.com/pkg/errors"
 	"github.com/tennuem/task/configs"
+	"github.com/tennuem/task/pkg/health"
 	"github.com/tennuem/task/pkg/repository/inmemory"
 	"github.com/tennuem/task/pkg/task"
 	"github.com/tennuem/task/tools/logger"
@@ -32,8 +33,13 @@ func NewServer() Server {
 	taskService = task.NewService(tasks)
 	taskService = task.NewLoggingService(log.With(logger, "component", "task"), taskService)
 
+	var healthService health.Service
+	healthService = health.NewService()
+	healthService = health.NewLoggingService(log.With(logger, "component", "health"), healthService)
+
 	r := mux.NewRouter().StrictSlash(false)
 	r.PathPrefix("/task").Handler(task.MakeHTTPHandler(taskService, log.With(logger, "component", "http handler")))
+	r.PathPrefix("/").Handler(health.MakeHTTPHandler(healthService, log.With(logger, "component", "http handler")))
 
 	return &server{
 		cfg:     cfg,
@@ -74,16 +80,11 @@ func (s *server) runHTTP() error {
 }
 
 func (s *server) interruptSignal() {
-	ch := make(chan struct{})
+	ch := make(chan os.Signal, 1)
 	s.g.Add(func() error {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-		select {
-		case sig := <-c:
-			return fmt.Errorf("received signal %s", sig)
-		case <-ch:
-			return nil
-		}
+		signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+		sig := <-ch
+		return errors.Errorf("received signal %s", sig)
 	}, func(error) {
 		close(ch)
 	})
