@@ -1,4 +1,4 @@
-# task [![Build Status](https://github.com/tennuem/task/workflows/build/badge.svg)](https://github.com/tennuem/task/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/tennuem/task)](https://goreportcard.com/report/github.com/tennuem/task) [![Coverage Status](https://coveralls.io/repos/github/tennuem/task/badge.svg?branch=master)](https://coveralls.io/github/tennuem/task?branch=master)
+# task [![Build Status](https://github.com/tennuem/task/workflows/build/badge.svg)](https://github.com/tennuem/task/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/tennuem/task)](https://goreportcard.com/report/github.com/tennuem/task) [![Coverage Status](https://coveralls.io/repos/github/tennuem/task/badge.svg?branch=master)](https://coveralls.io/github/tennuem/task?branch=master) ![CodeQL](https://github.com/tennuem/task/workflows/CodeQL/badge.svg?branch=master)
 
 ## Used
 
